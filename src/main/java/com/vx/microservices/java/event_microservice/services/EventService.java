@@ -4,6 +4,8 @@ import com.vx.microservices.java.event_microservice.domain.Event;
 import com.vx.microservices.java.event_microservice.domain.Subscription;
 import com.vx.microservices.java.event_microservice.dtos.EmailRequestDTO;
 import com.vx.microservices.java.event_microservice.dtos.EventRequestDTO;
+import com.vx.microservices.java.event_microservice.exceptions.EventFullException;
+import com.vx.microservices.java.event_microservice.exceptions.EventNotFoundException;
 import com.vx.microservices.java.event_microservice.repositories.EventRepository;
 import com.vx.microservices.java.event_microservice.repositories.SubscriptionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +54,11 @@ public class EventService {
         return eventRepository.save(newEvent);
     }
 
+
+    private Boolean isEventFull(Event event){
+        return event.getRegisteredParticipants() >= event.getMaxParticipants();
+    }
+
     // MÉTODO PARA REGISTRAR UMA NOVO PARTICIPANTE NO EVENTO
     public void registerParticipant(String eventId, String participantEmail){
         /* primeira coisa que vou fazer é buscar o evento pelo id, se eu não encontrar
@@ -61,7 +68,9 @@ public class EventService {
 
         /* Se encontramos o evento então podemos criar a inscrição*/
 
-        if (event.getRegisteredParticipants() < event.getMaxParticipants()){
+        if (isEventFull(event)) {
+            throw new EventFullException();
+        }
             Subscription subscription = new Subscription(event, participantEmail);
             subscriptionRepository.save(subscription);
 
@@ -78,9 +87,7 @@ public class EventService {
             * parametro um EmailRequestDTO então eu tive que criar esse EmailRequestDTO
             * logo acima e passando os devidos valores pelo parametro. */
             emailServiceClient.sendEmail(emailRequest);
-        } else {
-            throw new EventFullException();
-        }
+
     }
 
 
