@@ -1,5 +1,6 @@
 package com.vx.microservices.java.event_microservice.services;
 
+import com.vx.microservices.java.event_microservice.dtos.EmailRequestDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
